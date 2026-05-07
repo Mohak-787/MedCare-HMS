@@ -1,0 +1,40 @@
+{
+  "name": "MedCare-HMS",
+  "version": "1.0.0",
+  "description": "A hospital management system with AI features.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "build": "tsc",
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/db/db.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/db/db.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/db/db.ts"
+  },
+  "keywords": [],
+  "author": "Mohak Devkota",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.2",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "chalk": "^5.6.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.28",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0"
+  }
+}
