@@ -2,6 +2,7 @@ import express, { Request, Response, Application } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
+import apiRoutes from "./routes/index.route";
 
 const app: Application = express();
 
@@ -15,5 +16,7 @@ app.use(cookieParser());
 app.get("/", (req: Request, res: Response) => {
   res.send("Server is healthy.");
 });
+
+app.use("/api", apiRoutes);
 
 export default app;
