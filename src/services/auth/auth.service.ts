@@ -1,0 +1,76 @@
+import { StatusCode } from "../../constants/statusCode.constant";
+import ServerDataSource from "../../configs/db.config";
+import { User } from "../../entities/user.entity";
+import { Auth } from "../../entities/auth.entity";
+import { hashIt, compareIt } from "../../utils/hash";
+import { SignupDto } from "../../dtos/auth/signup.dto";
+import { UserRole } from "../../constants/index.constant";
+import { SigninDto } from "../../dtos/auth/signin.dto";
+import { generateAccessToken, generateRefreshToken } from "../../utils/token";
+import { refreshMaxage } from "../../constants/token.constant";
+
+export class AuthService {
+  private userRepository = ServerDataSource.getRepository(User);
+  private authRepository = ServerDataSource.getRepository(Auth);
+
+  async signup(data: SignupDto) {
+    const existingUser = await this.userRepository.findOne({
+      where: [{ email: data.email }, { phone: data.phone }],
+      relations: ['auth']
+    });
+
+    if (existingUser) {
+      return { status: StatusCode.ALREADY_EXIST }
+    }
+
+    const user = this.userRepository.create({
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      gender: data.gender,
+      role: UserRole.PATIENT
+    });
+
+    const auth = new Auth();
+    auth.passwordHash = await hashIt(data.password, 12);
+
+    user.auth = auth;
+    await this.userRepository.save(user);
+
+    return { status: StatusCode.CREATED };
+  }
+
+  async signin(data: SigninDto) {
+    const user = await this.userRepository.findOne({
+      where: [{ email: data.credential }, { phone: data.credential }],
+      relations: ['auth']
+    });
+
+    if (!user) {
+      return { status: StatusCode.UNAUTHORIZED }
+    }
+
+    const isPasswordCorrect = await compareIt(data.password, user.auth.passwordHash as string);
+
+    if (!isPasswordCorrect) {
+      return { status: StatusCode.UNAUTHORIZED }
+    }
+
+    const refreshToken = generateRefreshToken(user.id);
+
+    const refreshTokenHash = await hashIt(refreshToken);
+    user.auth.refreshTokenHash = refreshTokenHash;
+    user.auth.refreshTokenExpiresAt = new Date(Date.now() + refreshMaxage);
+
+    await this.authRepository.save(user.auth);
+
+    const accessToken = generateAccessToken(user.id, user.role, user.auth.id);
+
+    return {
+      status: StatusCode.OK,
+      refreshToken,
+      accessToken
+    }
+  }
+}

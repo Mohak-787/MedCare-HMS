@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
 import apiRoutes from "./routes/index.route";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler.middleware";
 
 const app: Application = express();
 
@@ -18,5 +19,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api", apiRoutes);
+
+app.use(globalErrorHandler);
 
 export default app;
