@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, Index, OneToMany } from "typeorm";
+import { Entity, Column, OneToOne, Index } from "typeorm";
 import { Auth } from "./auth.entity";
 import { Gender, UserRole } from "../constants/index.constant";
 import { Base } from "./base.entity";

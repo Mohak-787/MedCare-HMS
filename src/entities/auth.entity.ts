@@ -5,11 +5,8 @@ import { Base } from "./base.entity";
 @Entity("auths")
 export class Auth extends Base {
   @OneToOne(() => User, (user) => user.auth, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "userId" })
+  @JoinColumn()
   user: User;
-
-  @Column({ name: 'userId', type: "varchar" })
-  userId: string
 
   @Column({ nullable: true })
   passwordHash?: string;
