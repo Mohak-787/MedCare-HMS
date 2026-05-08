@@ -3,7 +3,9 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  BeforeInsert
 } from "typeorm";
+import { generateUuid } from "../utils/generateUuid";
 
 export abstract class Base extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -14,4 +16,9 @@ export abstract class Base extends BaseEntity {
 
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
+
+  @BeforeInsert()
+  setId() {
+    this.id = generateUuid();
+  }
 }

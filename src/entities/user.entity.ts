@@ -26,9 +26,6 @@ export class User extends Base {
   address: string;
 
   @Column({ type: "varchar", nullable: true })
-  createdBy?: string;
-
-  @Column({ type: "varchar", nullable: true })
   profilePicture?: string;
 
   @Column({ type: "enum", enum: UserRole, default: UserRole.PATIENT })
