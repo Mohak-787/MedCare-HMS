@@ -25,6 +25,10 @@ export class SignupDto {
 
   @Transform(({ value }) => value?.toLowerCase().trim())
   @IsEmail()
+  @Matches(regex.emailRegex, {
+    message: "Email must be valid",
+    groups: ["create", "update"],
+  })
   @IsNotEmpty({ message: "Email is required", groups: ["create"] })
   @IsOptional({ groups: ["update"] })
   email?: string;
