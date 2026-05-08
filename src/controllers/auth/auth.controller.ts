@@ -7,6 +7,8 @@ import { SignupDto } from "../../dtos/auth/signup.dto";
 import { ApiError } from "../../utils/apiError";
 import { StatusCode } from "../../constants/statusCode.constant";
 import { ApiResponse } from "../../utils/apiResponse";
+import { SigninDto } from "../../dtos/auth/signin.dto";
+import { accessMaxage, refreshMaxage } from "../../constants/token.constant";
 
 export class AuthController {
   private authService = new AuthService();
@@ -31,9 +33,48 @@ export class AuthController {
         throw new ApiError(StatusCode.ALREADY_EXIST, "User already exists");
       }
 
-      res.status(StatusCode.CREATED).json(
-        new ApiResponse(StatusCode.CREATED, null, "Signup successful")
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "Signup successful")
       )
+    }
+  );
+
+  signin = asyncHandler(
+    async (req: Request, res: Response) => {
+      const data = plainToInstance(SigninDto, req.body);
+
+      const errors = await validate(data, {
+        whitelist: true,
+        forbidNonWhitelisted: true
+      });
+
+      if (errors.length > 0) {
+        throw new ApiError(StatusCode.BAD_REQUEST, "Validation failed", errors);
+      }
+
+      const result: any = await this.authService.signin(data);
+
+      if (result.status === StatusCode.UNAUTHORIZED) {
+        throw new ApiError(StatusCode.UNAUTHORIZED, "Invalid credentials");
+      }
+
+      res.cookie('refreshToken', result?.refreshToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: false,
+        maxAge: refreshMaxage
+      });
+
+      res.cookie('accessToken', result?.accessToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: false,
+        maxAge: accessMaxage
+      });
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "Signin successful")
+      );
     }
   );
 }
