@@ -83,4 +83,28 @@ export class AuthService {
       accessToken
     }
   }
+
+  async changePassword(data: any, payload: any) {
+    const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+      relations: ["auth"]
+    });
+
+    if (!user) {
+      return { status: StatusCode.NOT_FOUND }
+    }
+
+    const isPasswordCorrect = await compareIt(data.oldPassword, user.auth.passwordHash as string);
+
+    if (!isPasswordCorrect) {
+      return { status: StatusCode.BAD_REQUEST }
+    }
+
+    const passwordHash = await hashIt(data.newPassword, 12);
+
+    user.auth.passwordHash = passwordHash;
+    await this.authRepository.save(user.auth);
+
+    return { status: StatusCode.OK }
+  }
 }
