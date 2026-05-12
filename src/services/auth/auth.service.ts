@@ -57,13 +57,23 @@ export class AuthService {
       return { status: StatusCode.UNAUTHORIZED }
     }
 
-    const refreshToken = generateRefreshToken(user.id);
+    let refreshToken = user.auth.refreshToken;
+    const refreshTokenExpiresAt = user.auth.refreshTokenExpiresAt;
 
-    const refreshTokenHash = await hashIt(refreshToken);
-    user.auth.refreshTokenHash = refreshTokenHash;
-    user.auth.refreshTokenExpiresAt = new Date(Date.now() + refreshMaxage);
+    if (
+      !refreshToken ||
+      !refreshTokenExpiresAt ||
+      refreshTokenExpiresAt < new Date()
+    ) {
+      refreshToken = generateRefreshToken(user.id);
 
-    await this.authRepository.save(user.auth);
+      user.auth.refreshToken = refreshToken;
+      user.auth.refreshTokenExpiresAt = new Date(
+        Date.now() + refreshMaxage
+      );
+
+      await this.authRepository.save(user.auth);
+    }
 
     const accessToken = generateAccessToken(user.id, user.role, user.auth.id);
 
