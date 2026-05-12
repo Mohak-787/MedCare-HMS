@@ -21,7 +21,7 @@ export class Auth extends Base {
   otpExpiry?: Date;
 
   @Column({ nullable: true })
-  refreshTokenHash?: string;
+  refreshToken?: string;
 
   @Column({ nullable: true })
   refreshTokenExpiresAt?: Date;

@@ -1,17 +1,21 @@
 import jwt from "jsonwebtoken";
-import env  from "../constants/env.constant";
+import env from "../constants/env.constant";
 import { UserRole } from "../constants/index.constant";
 
 export function generateAccessToken(
   userId: string,
   role: UserRole,
-  tokenId: string
+  authId: string
 ) {
-  return jwt.sign({ id: userId, role, tokenId }, env.JWT_ACCESS_SECRET, {
+  return jwt.sign({ id: userId, role, authId }, env.JWT_ACCESS_SECRET, {
     expiresIn: "15m",
   });
 }
 
 export function generateRefreshToken(userId: string) {
   return jwt.sign({ id: userId }, env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
+}
+
+export function verifyToken(token: string, secret: string) {
+  return jwt.verify(token, secret);
 }

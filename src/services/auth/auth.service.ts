@@ -57,13 +57,23 @@ export class AuthService {
       return { status: StatusCode.UNAUTHORIZED }
     }
 
-    const refreshToken = generateRefreshToken(user.id);
+    let refreshToken = user.auth.refreshToken;
+    const refreshTokenExpiresAt = user.auth.refreshTokenExpiresAt;
 
-    const refreshTokenHash = await hashIt(refreshToken);
-    user.auth.refreshTokenHash = refreshTokenHash;
-    user.auth.refreshTokenExpiresAt = new Date(Date.now() + refreshMaxage);
+    if (
+      !refreshToken ||
+      !refreshTokenExpiresAt ||
+      refreshTokenExpiresAt < new Date()
+    ) {
+      refreshToken = generateRefreshToken(user.id);
 
-    await this.authRepository.save(user.auth);
+      user.auth.refreshToken = refreshToken;
+      user.auth.refreshTokenExpiresAt = new Date(
+        Date.now() + refreshMaxage
+      );
+
+      await this.authRepository.save(user.auth);
+    }
 
     const accessToken = generateAccessToken(user.id, user.role, user.auth.id);
 
@@ -72,5 +82,29 @@ export class AuthService {
       refreshToken,
       accessToken
     }
+  }
+
+  async changePassword(data: any, payload: any) {
+    const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+      relations: ["auth"]
+    });
+
+    if (!user) {
+      return { status: StatusCode.NOT_FOUND }
+    }
+
+    const isPasswordCorrect = await compareIt(data.oldPassword, user.auth.passwordHash as string);
+
+    if (!isPasswordCorrect) {
+      return { status: StatusCode.BAD_REQUEST }
+    }
+
+    const passwordHash = await hashIt(data.newPassword, 12);
+
+    user.auth.passwordHash = passwordHash;
+    await this.authRepository.save(user.auth);
+
+    return { status: StatusCode.OK }
   }
 }
