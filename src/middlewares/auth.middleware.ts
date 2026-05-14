@@ -32,6 +32,33 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
       throw new ApiError(StatusCode.UNAUTHORIZED, "Sign in required");
     }
 
+    let user;
+
+    if (refreshToken) {
+      let decodedRefresh: any;
+      try {
+        decodedRefresh = verifyToken(refreshToken, env.JWT_REFRESH_SECRET);
+      } catch (error) {
+        throw new ApiError(StatusCode.SESSION_EXPIRED, "Session expired, please login again");
+      }
+
+      user = await ServerDataSource.getRepository(User).findOne({
+        where: { id: decodedRefresh.id },
+        relations: ["auth"],
+      });
+
+      if (
+        !user ||
+        !user.auth ||
+        !user.auth.refreshToken ||
+        user.auth.refreshToken !== refreshToken ||
+        !user.auth.refreshTokenExpiresAt ||
+        Date.now() > user.auth.refreshTokenExpiresAt.getTime()
+      ) {
+        throw new ApiError(StatusCode.SESSION_EXPIRED, "Invalid or expired session");
+      }
+    }
+
     let decoded: UserPayload | null = null;
 
     if (accessToken) {
@@ -42,29 +69,7 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
       }
     }
 
-    if (!decoded && refreshToken) {
-      let decodedRefresh: any;
-      try {
-        decodedRefresh = verifyToken(refreshToken, env.JWT_REFRESH_SECRET);
-      } catch (error) {
-        throw new ApiError(StatusCode.SESSION_EXPIRED, "Session expired, please login again");
-      }
-
-      const user = await ServerDataSource.getRepository(User).findOne({
-        where: { id: decodedRefresh.id },
-        relations: ["auth"],
-      });
-
-      if (
-        !user ||
-        !user.auth ||
-        user.auth.refreshToken !== refreshToken ||
-        !user.auth.refreshTokenExpiresAt ||
-        Date.now() > user.auth.refreshTokenExpiresAt.getTime()
-      ) {
-        throw new ApiError(StatusCode.SESSION_EXPIRED, "Invalid or expired session");
-      }
-
+    if (!decoded && refreshToken && user) {
       accessToken = generateAccessToken(user.id, user.role, user.auth.id);
 
       res.cookie("accessToken", accessToken, {
