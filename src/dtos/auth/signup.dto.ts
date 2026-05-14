@@ -69,8 +69,8 @@ export class SignupDto {
   role?: UserRole;
 
   @IsString()
-  @MinLength(6)
-  @MaxLength(100)
+  @MinLength(6, { message: "Password must be atleast 6 characters long" })
+  @MaxLength(100, { message: "Password is too long" })
   @Matches(regex.passwordRegex, {
     message:
       "Password must include at least one letter, one number, and one special character.",
