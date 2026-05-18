@@ -9,6 +9,7 @@ import { SigninDto } from "../../dtos/auth/signin.dto";
 import { generateAccessToken, generateRefreshToken } from "../../utils/token";
 import { refreshMaxage } from "../../constants/token.constant";
 import { ChangePasswordDto } from "../../dtos/auth/changePassword.dto";
+import { ResetPasswordDto } from "../../dtos/auth/resetPassword.dto";
 
 export class AuthService {
   private userRepository = ServerDataSource.getRepository(User);
@@ -113,4 +114,25 @@ export class AuthService {
 
     return { status: StatusCode.OK }
   }
+
+  async resetPassword(data: ResetPasswordDto, payload: any) {
+    const user = await this.userRepository.findOne({
+      where: { email: payload.email },
+      relations: ['auth']
+    })
+
+    if (!user) {
+      return { status: StatusCode.NOT_FOUND }
+    }
+
+    const passwordHash = await hashIt(data.newPassword, 12);
+
+    user.auth.passwordHash = passwordHash;
+    user.auth.refreshToken = undefined
+    user.auth.refreshTokenExpiresAt = undefined
+
+    await this.authRepository.save(user.auth);
+    return { status: StatusCode.OK }
+  }
+
 }
