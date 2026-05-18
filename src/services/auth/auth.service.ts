@@ -10,6 +10,8 @@ import { generateAccessToken, generateRefreshToken } from "../../utils/token";
 import { refreshMaxage } from "../../constants/token.constant";
 import { ChangePasswordDto } from "../../dtos/auth/changePassword.dto";
 import { ResetPasswordDto } from "../../dtos/auth/resetPassword.dto";
+import { forgotPasswordDto } from "../../dtos/auth/forgotPassword.dto";
+import { ApiError } from "../../utils/apiError";
 
 export class AuthService {
   private userRepository = ServerDataSource.getRepository(User);
@@ -132,6 +134,20 @@ export class AuthService {
     user.auth.refreshTokenExpiresAt = undefined
 
     await this.authRepository.save(user.auth);
+    return { status: StatusCode.OK }
+  }
+
+  async forgotPassword(data: forgotPasswordDto) {
+    const user = await this.userRepository.findOne({
+      where: { email: data.email },
+      relations: ['auth']
+    });
+
+    if (!user) {
+      return { status: StatusCode.NOT_FOUND }
+    }
+
+    // Todo OTP setup
     return { status: StatusCode.OK }
   }
 

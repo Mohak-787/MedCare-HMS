@@ -11,6 +11,7 @@ import { SigninDto } from "../../dtos/auth/signin.dto";
 import { accessMaxage, refreshMaxage } from "../../constants/token.constant";
 import { ChangePasswordDto } from "../../dtos/auth/changePassword.dto";
 import { ResetPasswordDto } from "../../dtos/auth/resetPassword.dto";
+import { forgotPasswordDto } from "../../dtos/auth/forgotPassword.dto";
 
 export class AuthController {
   private authService = new AuthService();
@@ -125,6 +126,31 @@ export class AuthController {
       }
 
       const result: any = await this.authService.resetPassword(data, req.user);
+    }
+  );
+
+  forgotPassword = asyncHandler(
+    async (req: Request, res: Response) => {
+      const data = plainToInstance(forgotPasswordDto, req.body);
+
+      const errors = await validate(data, {
+        whitelist: true,
+        forbidNonWhitelisted: true
+      });
+
+      if (errors.length > 0) {
+        throw new ApiError(StatusCode.BAD_REQUEST, "Validation error", errors);
+      }
+
+      const result: any = await this.authService.forgotPassword(data);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "OTP sent successfully")
+      )
     }
   );
 }
