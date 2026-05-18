@@ -4,14 +4,14 @@ import {
   MinLength,
   MaxLength,
   Matches,
-  ValidateIf
 } from "class-validator";
 
 import { Transform } from "class-transformer";
 import { regex } from "../../constants/regex.constant";
+import { Match } from "../../decorators/match.decorator";
 
 export class ResetPasswordDto {
-  @Transform(({ value }) => value?.trim)
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @MinLength(6, { message: "Password must be atleast 6 characters long" })
   @MaxLength(100, { message: "Password is too long" })
@@ -22,10 +22,8 @@ export class ResetPasswordDto {
   @IsNotEmpty({ message: "New password is required" })
   newPassword: string;
 
-  @Transform(({ value }) => value?.trim)
+  @Transform(({ value }) => value?.trim())
   @IsString()
-  @ValidateIf((o) => o.newPassword === o.confirmPassword, {
-    message: "Passwords donot match"
-  })
+  @Match("newPassword", { message: "Passwords donot match" })
   confirmPassword: string;
 }

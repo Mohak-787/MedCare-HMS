@@ -14,6 +14,7 @@ import { Transform } from "class-transformer";
 
 import { UserRole, Gender } from "../../constants/index.constant";
 import { regex } from "../../constants/regex.constant";
+import { Match } from "../../decorators/match.decorator";
 
 export class SignupDto {
   @Transform(({ value }) => value?.trim())
@@ -79,4 +80,14 @@ export class SignupDto {
   @IsNotEmpty({ message: "Password is required", groups: ["create"] })
   @IsOptional({ groups: ["update"] })
   password: string;
+
+  @Transform(({ value }) => value?.trim())
+  @IsString()
+  @Match("password", {
+    message: "Passwords do not match",
+    groups: ["create", "update"],
+  })
+  @IsNotEmpty({ message: "Confirm password is required", groups: ["create"] })
+  @IsOptional({ groups: ["update"] })
+  confirmPassword: string;
 }
