@@ -33,15 +33,22 @@ export class UserService {
   }
 
   async updateUser(data: SignupDto, payload: any) {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.id }
-    });
+    const result = await this.userRepository.update({ id: payload.id }, data);
 
-    if (!user) {
-      return { status: StatusCode.NOT_FOUND }
+    if (result.affected === 0) {
+      return { status: StatusCode.NOT_FOUND };
     }
 
-    await this.userRepository.update({ id: payload.id }, data);
+    return { status: StatusCode.OK }
+  }
+
+  async deleteUser(payload: any) {
+    const result = await this.userRepository.delete({ id: payload.id });
+
+    if (result.affected === 0) {
+      return { status: StatusCode.NOT_FOUND };
+    }
+
     return { status: StatusCode.OK }
   }
 }

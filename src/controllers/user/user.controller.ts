@@ -54,4 +54,18 @@ export class UserController {
       )
     }
   );
+
+  deleteUser = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result: any = await this.userService.deleteUser(req.user);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      return res.status(result.status).json(
+        new ApiResponse(result.status, null, "User deleted successfully")
+      )
+    }
+  );
 }
