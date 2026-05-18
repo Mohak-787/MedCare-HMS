@@ -11,14 +11,16 @@ export class UserService {
 
   async userInfo(payload: any) {
     const user = await this.userRepository.findOne({
-      where: { email: payload.email },
+      where: { id: payload.id },
     });
 
     if (!user) {
       return { status: StatusCode.NOT_FOUND }
     }
 
-    const info = plainToInstance(UserInfoResponse, user);
+    const info = plainToInstance(UserInfoResponse, user, {
+      excludeExtraneousValues: true,
+    });
 
     const errors = await validate(info, {
       whitelist: true,

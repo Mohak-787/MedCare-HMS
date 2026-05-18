@@ -17,7 +17,7 @@ export class UserController {
       const result: any = await this.userService.userInfo(req.user);
 
       if (result.status === StatusCode.INTERNAL_SERVER_ERROR) {
-        throw new ApiError(result.satus, Message.INTERNAL_SERVER_ERROR, result.errors);
+        throw new ApiError(result.status, Message.INTERNAL_SERVER_ERROR, result.errors);
       }
 
       res.status(result.status).json(
