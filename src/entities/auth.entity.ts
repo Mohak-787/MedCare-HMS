@@ -1,6 +1,7 @@
 import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Base } from "./base.entity";
+import { OtpPurpose } from "../constants/otp.constant";
 
 @Entity("auths")
 export class Auth extends Base {
@@ -19,6 +20,9 @@ export class Auth extends Base {
 
   @Column({ nullable: true })
   otpExpiry?: Date;
+
+  @Column({ nullable: true, type: "enum", enum: OtpPurpose })
+  otpPurpose?: string
 
   @Column({ nullable: true })
   refreshToken?: string;

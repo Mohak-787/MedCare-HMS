@@ -7,9 +7,9 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
-    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/db/db.ts",
-    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/db/db.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/db/db.ts"
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/configs/db.config.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/configs/db.config.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/configs/db.config.ts"
   },
   "keywords": [],
   "author": "Mohak Devkota",
