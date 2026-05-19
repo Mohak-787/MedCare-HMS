@@ -40,4 +40,10 @@ export class OtpController {
       )
     }
   );
+
+  resendOtp = asyncHandler(
+    async (req: Request, res: Response) => {
+
+    }
+  );
 }
