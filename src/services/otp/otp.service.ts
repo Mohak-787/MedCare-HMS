@@ -4,12 +4,13 @@ import { StatusCode } from "../../constants/statusCode.constant";
 import ServerDataSource from "../../configs/db.config";
 import { OtpPurpose } from "../../constants/otp.constant";
 import { hashIt, compareIt } from "../../utils/hash";
+import { VerifyOtpDto } from "../../dtos/otp/otp.dto";
 
 export class OtpService {
   private userRepository = ServerDataSource.getRepository(User);
   private authRepository = ServerDataSource.getRepository(Auth);
 
-  async verifyOtp(data: any) {
+  async verifyOtp(data: VerifyOtpDto) {
     const user = await this.userRepository.findOne({
       where: { email: data.email },
       relations: ['auth']
@@ -37,14 +38,19 @@ export class OtpService {
     switch (user.auth.otpPurpose) {
       case OtpPurpose.SIGNUP:
         user.isVerified = true;
-        await this.userRepository.save(user);
+        user.auth.otpHash = undefined;
+        user.auth.otpExpiry = undefined;
+        user.auth.otpPurpose = undefined;
 
-        return { status: StatusCode.OK };
+        await this.userRepository.save(user);
+        await this.authRepository.save(user.auth);
+
+        return { status: StatusCode.OK, purpose: OtpPurpose.SIGNUP };
 
       case OtpPurpose.FORGOT_PASSWORD:
         // Todo issue temp token for reset password access
-        
-        return { status: StatusCode.OK, tempToken: null }
+
+        return { status: StatusCode.OK, tempToken: null, purpose: OtpPurpose.FORGOT_PASSWORD }
 
       default:
         return { status: StatusCode.INTERNAL_SERVER_ERROR }

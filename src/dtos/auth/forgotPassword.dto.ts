@@ -7,7 +7,7 @@ import {
 import { Transform } from "class-transformer";
 import { regex } from "../../constants/regex.constant";
 
-export class forgotPasswordDto {
+export class ForgotPasswordDto {
   @Transform(({ value }) => value?.toLowerCase().trim())
   @IsEmail()
   @Matches(regex.emailRegex, {
