@@ -10,7 +10,9 @@ const {
   DB_PASSWORD,
   DB_NAME,
   JWT_ACCESS_SECRET,
-  JWT_REFRESH_SECRET
+  JWT_REFRESH_SECRET,
+  GOOGLE_USER,
+  GOOGLE_APP_PASSWORD
 } = process.env;
 
 if (
@@ -21,7 +23,9 @@ if (
   !DB_PASSWORD ||
   !DB_NAME ||
   !JWT_ACCESS_SECRET ||
-  !JWT_REFRESH_SECRET
+  !JWT_REFRESH_SECRET ||
+  !GOOGLE_USER ||
+  !GOOGLE_APP_PASSWORD
 ) {
   throw new Error("Missing required environment variables");
 }
@@ -34,7 +38,9 @@ const env = {
   DB_PASSWORD,
   DB_NAME,
   JWT_ACCESS_SECRET,
-  JWT_REFRESH_SECRET
+  JWT_REFRESH_SECRET,
+  GOOGLE_APP_PASSWORD,
+  GOOGLE_USER
 };
 
 export default env;

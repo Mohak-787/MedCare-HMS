@@ -11,7 +11,7 @@ import { SigninDto } from "../../dtos/auth/signin.dto";
 import { accessMaxage, refreshMaxage } from "../../constants/token.constant";
 import { ChangePasswordDto } from "../../dtos/auth/changePassword.dto";
 import { ResetPasswordDto } from "../../dtos/auth/resetPassword.dto";
-import { forgotPasswordDto } from "../../dtos/auth/forgotPassword.dto";
+import { ForgotPasswordDto } from "../../dtos/auth/forgotPassword.dto";
 
 export class AuthController {
   private authService = new AuthService();
@@ -131,7 +131,7 @@ export class AuthController {
 
   forgotPassword = asyncHandler(
     async (req: Request, res: Response) => {
-      const data = plainToInstance(forgotPasswordDto, req.body);
+      const data = plainToInstance(ForgotPasswordDto, req.body);
 
       const errors = await validate(data, {
         whitelist: true,
