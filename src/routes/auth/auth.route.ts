@@ -9,6 +9,8 @@ router.post("/signup", authController.signup);
 router.post("/signin", authController.signin);
 
 router.patch("/change-password", authenticate(), authController.changePassword);
+router.post("/logout", authenticate(), authController.logout);
+router.post("/logout-all-device", authenticate(), authController.logoutAllDevice);
 router.patch("/reset-password", tempAuthenticate, authController.resetPassword);
 
 router.post("/forgot-password", authController.forgotPassword);

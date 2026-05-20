@@ -160,4 +160,35 @@ export class AuthService {
     return { status: StatusCode.OK }
   }
 
+  async logout(payload: any) {
+    const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+      relations: ['auth']
+    });
+
+    if (!user) {
+      return { status: StatusCode.NOT_FOUND }
+    }
+
+    return { status: StatusCode.OK }
+  }
+
+  async logoutAllDevice(payload: any) {
+    const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+      relations: ['auth']
+    });
+
+    if (!user) {
+      return { status: StatusCode.NOT_FOUND }
+    }
+
+    user.auth.refreshToken = undefined;
+    user.auth.refreshTokenExpiresAt = undefined;
+
+    await this.authRepository.save(user.auth);
+
+    return { status: StatusCode.OK }
+  }
+
 }

@@ -157,4 +157,38 @@ export class AuthController {
       )
     }
   );
+
+  logout = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result: any = await this.authService.logout(req.user);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "User logged out successfully")
+      )
+    }
+  );
+
+  logoutAllDevice = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result: any = await this.authService.logoutAllDevice(req.user);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "User logged out from all device successfully")
+      )
+    }
+  );
 }
