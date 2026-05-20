@@ -9,24 +9,24 @@ export class Auth extends Base {
   @JoinColumn()
   user: User;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   passwordHash?: string;
 
   @Column("jsonb", { nullable: true })
   passwordHistory?: { passwordHash: string; createdAt: Date }[];
 
-  @Column({ nullable: true })
-  otpHash?: string;
+  @Column({ type: "varchar", nullable: true })
+  otpHash?: string | null;
 
-  @Column({ nullable: true })
-  otpExpiry?: Date;
+  @Column({ type: "timestamp", nullable: true })
+  otpExpiry?: Date | null;
 
   @Column({ nullable: true, type: "enum", enum: OtpPurpose })
-  otpPurpose?: string
+  otpPurpose?: string | null
 
-  @Column({ nullable: true })
-  refreshToken?: string;
+  @Column({ type: "varchar", nullable: true })
+  refreshToken?: string | null;
 
-  @Column({ nullable: true })
-  refreshTokenExpiresAt?: Date;
+  @Column({ type: "timestamp", nullable: true })
+  refreshTokenExpiresAt?: Date | null;
 }

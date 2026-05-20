@@ -116,10 +116,8 @@ export class AuthService {
     const passwordHash = await hashIt(data.newPassword, 12);
 
     user.auth.passwordHash = passwordHash;
-    await this.authRepository.save(user.auth);
-
-    user.auth.refreshToken = undefined
-    user.auth.refreshTokenExpiresAt = undefined
+    user.auth.refreshToken = null;
+    user.auth.refreshTokenExpiresAt = null;
 
     await this.authRepository.save(user.auth);
 
@@ -139,8 +137,8 @@ export class AuthService {
     const passwordHash = await hashIt(data.newPassword, 12);
 
     user.auth.passwordHash = passwordHash;
-    user.auth.refreshToken = undefined
-    user.auth.refreshTokenExpiresAt = undefined
+    user.auth.refreshToken = null;
+    user.auth.refreshTokenExpiresAt = null;
 
     await this.authRepository.save(user.auth);
     return { status: StatusCode.OK }
@@ -170,6 +168,11 @@ export class AuthService {
       return { status: StatusCode.NOT_FOUND }
     }
 
+    user.auth.refreshToken = null;
+    user.auth.refreshTokenExpiresAt = null;
+
+    await this.authRepository.save(user.auth);
+
     return { status: StatusCode.OK }
   }
 
@@ -183,8 +186,8 @@ export class AuthService {
       return { status: StatusCode.NOT_FOUND }
     }
 
-    user.auth.refreshToken = undefined;
-    user.auth.refreshTokenExpiresAt = undefined;
+    user.auth.refreshToken = null;
+    user.auth.refreshTokenExpiresAt = null;
 
     await this.authRepository.save(user.auth);
 

@@ -129,7 +129,16 @@ export class AuthController {
         throw new ApiError(StatusCode.BAD_REQUEST, "Validation error", errors);
       }
 
-      const result: any = await this.authService.resetPassword(data, req.user);
+      const result: any = await this.authService.resetPassword(data, req.payload);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      res.clearCookie("tempToken");
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "Password reset sucessfully")
+      )
     }
   );
 

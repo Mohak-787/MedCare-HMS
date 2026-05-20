@@ -15,10 +15,16 @@ interface UserPayload {
   authId: string;
 }
 
+interface TempPayload {
+  email: string;
+  purpose: string;
+}
+
 declare global {
   namespace Express {
     interface Request {
       user?: UserPayload;
+      payload?: TempPayload
     }
   }
 }
@@ -57,6 +63,8 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
       ) {
         throw new ApiError(StatusCode.SESSION_EXPIRED, "Invalid or expired session");
       }
+    } else {
+      throw new ApiError(StatusCode.UNAUTHORIZED, "Sign in required");
     }
 
     let decoded: UserPayload | null = null;
@@ -106,7 +114,7 @@ export const tempAuthenticate = asyncHandler(
       throw new ApiError(StatusCode.UNAUTHORIZED, "OTP verification required");
     }
 
-    const decoded: any = verifyToken(tempToken, env.JWT_ACCESS_SECRET);
+    const decoded: any = verifyToken(tempToken, env.JWT_TEMP_SECRET);
 
     if (!decoded) {
       throw new ApiError(StatusCode.SESSION_EXPIRED, "Session expired");
