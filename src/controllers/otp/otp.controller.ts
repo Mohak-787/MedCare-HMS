@@ -8,6 +8,7 @@ import { ApiError } from "../../utils/apiError";
 import { StatusCode } from "../../constants/statusCode.constant";
 import { Message } from "../../constants/message.constant";
 import { ApiResponse } from "../../utils/apiResponse";
+import { tempMaxage } from "../../constants/token.constant";
 
 export class OtpController {
   private otpService = new OtpService();
@@ -37,6 +38,15 @@ export class OtpController {
 
       if (result.status === StatusCode.INTERNAL_SERVER_ERROR) {
         throw new ApiError(result.status, Message.INTERNAL_SERVER_ERROR);
+      }
+
+      if (result.tempToken) {
+        res.cookie("tempToken", result.tempToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false,
+          maxAge: tempMaxage
+        });
       }
 
       res.status(result.status).json(

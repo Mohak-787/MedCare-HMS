@@ -156,7 +156,7 @@ export class AuthService {
       return { status: StatusCode.NOT_FOUND }
     }
 
-    // Todo OTP setup
+    await this.otpSerivce.sendOtp(OtpPurpose.FORGOT_PASSWORD, user.email, user.auth);
     return { status: StatusCode.OK }
   }
 

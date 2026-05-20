@@ -16,6 +16,10 @@ export function generateRefreshToken(userId: string) {
   return jwt.sign({ id: userId }, env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 }
 
+export function generateTempToken(email: string, purpose: string) {
+  return jwt.sign({ email, purpose }, env.JWT_TEMP_SECRET, { expiresIn: "3m" });
+}
+
 export function verifyToken(token: string, secret: string) {
   return jwt.verify(token, secret);
 }

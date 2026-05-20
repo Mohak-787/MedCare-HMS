@@ -12,7 +12,8 @@ const {
   JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
   GOOGLE_USER,
-  GOOGLE_APP_PASSWORD
+  GOOGLE_APP_PASSWORD,
+  JWT_TEMP_SECRET
 } = process.env;
 
 if (
@@ -25,7 +26,8 @@ if (
   !JWT_ACCESS_SECRET ||
   !JWT_REFRESH_SECRET ||
   !GOOGLE_USER ||
-  !GOOGLE_APP_PASSWORD
+  !GOOGLE_APP_PASSWORD ||
+  !JWT_TEMP_SECRET
 ) {
   throw new Error("Missing required environment variables");
 }
@@ -40,7 +42,8 @@ const env = {
   JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
   GOOGLE_APP_PASSWORD,
-  GOOGLE_USER
+  GOOGLE_USER,
+  JWT_TEMP_SECRET
 };
 
 export default env;

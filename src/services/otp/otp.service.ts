@@ -8,6 +8,7 @@ import { ResendOtpDto, VerifyOtpDto } from "../../dtos/otp/otp.dto";
 import { generateOtp } from "../../utils/generateOtp";
 import { otpHtmlTemplate, otpTextTemplate } from "../../templates/otp.template";
 import { sendEmail } from "../../configs/mail.config";
+import { generateTempToken } from "../../utils/token";
 
 export class OtpService {
   private userRepository = ServerDataSource.getRepository(User);
@@ -48,12 +49,11 @@ export class OtpService {
         await this.userRepository.save(user);
         await this.authRepository.save(user.auth);
 
-        return { status: StatusCode.OK, purpose: OtpPurpose.SIGNUP };
+        return { status: StatusCode.OK };
 
       case OtpPurpose.FORGOT_PASSWORD:
-        // Todo issue temp token for reset password access
-
-        return { status: StatusCode.OK, tempToken: null, purpose: OtpPurpose.FORGOT_PASSWORD }
+        const tempToken = generateTempToken(user.email, OtpPurpose.FORGOT_PASSWORD);
+        return { status: StatusCode.OK, tempToken }
 
       default:
         return { status: StatusCode.INTERNAL_SERVER_ERROR }
