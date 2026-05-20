@@ -31,6 +31,10 @@ export class OtpController {
         throw new ApiError(result.status, "OTP expired")
       }
 
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
       if (result.status === StatusCode.INTERNAL_SERVER_ERROR) {
         throw new ApiError(result.status, Message.INTERNAL_SERVER_ERROR);
       }

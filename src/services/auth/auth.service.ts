@@ -11,10 +11,13 @@ import { refreshMaxage } from "../../constants/token.constant";
 import { ChangePasswordDto } from "../../dtos/auth/changePassword.dto";
 import { ResetPasswordDto } from "../../dtos/auth/resetPassword.dto";
 import { ForgotPasswordDto } from "../../dtos/auth/forgotPassword.dto";
+import { OtpService } from "../otp/otp.service";
+import { OtpPurpose } from "../../constants/otp.constant";
 
 export class AuthService {
   private userRepository = ServerDataSource.getRepository(User);
   private authRepository = ServerDataSource.getRepository(Auth);
+  private otpSerivce = new OtpService();
 
   async signup(data: SignupDto) {
     const existingUser = await this.userRepository.findOne({
@@ -41,6 +44,8 @@ export class AuthService {
     user.auth = auth;
     await this.userRepository.save(user);
 
+    await this.otpSerivce.sendOtp(OtpPurpose.SIGNUP, user.email, user.auth);
+
     return { status: StatusCode.CREATED };
   }
 
@@ -52,6 +57,11 @@ export class AuthService {
 
     if (!user) {
       return { status: StatusCode.UNAUTHORIZED }
+    }
+
+    if (!user.isVerified) {
+      await this.otpSerivce.sendOtp(OtpPurpose.SIGNUP, user.email, user.auth)
+      return { status: StatusCode.BAD_REQUEST }
     }
 
     const isPasswordCorrect = await compareIt(data.password, user.auth.passwordHash as string);

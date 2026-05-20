@@ -29,13 +29,13 @@ export class OtpService {
       || user.auth.otpExpiry < new Date()
       || !user.auth.otpPurpose
     ) {
-      return { status: StatusCode.BAD_REQUEST }
+      return { status: StatusCode.SESSION_EXPIRED }
     }
 
     const isOtpMatch = await compareIt(data.otp, user.auth.otpHash);
 
     if (!isOtpMatch) {
-      return { status: StatusCode.SESSION_EXPIRED }
+      return { status: StatusCode.BAD_REQUEST }
     }
 
     switch (user.auth.otpPurpose) {

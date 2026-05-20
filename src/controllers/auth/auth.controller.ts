@@ -61,6 +61,10 @@ export class AuthController {
         throw new ApiError(StatusCode.UNAUTHORIZED, "Invalid credentials");
       }
 
+      if (result.status === StatusCode.BAD_REQUEST) {
+        throw new ApiError(result.status, "Email verification required");
+      }
+
       res.cookie('refreshToken', result?.refreshToken, {
         httpOnly: true,
         sameSite: 'strict',
