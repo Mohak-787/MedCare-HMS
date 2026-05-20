@@ -97,3 +97,22 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
     req.user = decoded;
     next();
   });
+
+export const tempAuthenticate = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const tempToken = req.cookies?.tempToken;
+
+    if (!tempToken) {
+      throw new ApiError(StatusCode.UNAUTHORIZED, "OTP verification required");
+    }
+
+    const decoded: any = verifyToken(tempToken, env.JWT_ACCESS_SECRET);
+
+    if (!decoded) {
+      throw new ApiError(StatusCode.SESSION_EXPIRED, "Session expired");
+    }
+
+    (req as any).payload = decoded;
+    next();
+  }
+);

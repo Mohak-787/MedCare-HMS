@@ -61,6 +61,10 @@ export class AuthController {
         throw new ApiError(StatusCode.UNAUTHORIZED, "Invalid credentials");
       }
 
+      if (result.status === StatusCode.BAD_REQUEST) {
+        throw new ApiError(result.status, "Email verification required");
+      }
+
       res.cookie('refreshToken', result?.refreshToken, {
         httpOnly: true,
         sameSite: 'strict',
@@ -150,6 +154,40 @@ export class AuthController {
 
       res.status(result.status).json(
         new ApiResponse(result.status, null, "OTP sent successfully")
+      )
+    }
+  );
+
+  logout = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result: any = await this.authService.logout(req.user);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "User logged out successfully")
+      )
+    }
+  );
+
+  logoutAllDevice = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result: any = await this.authService.logoutAllDevice(req.user);
+
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "User logged out from all device successfully")
       )
     }
   );

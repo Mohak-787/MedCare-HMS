@@ -8,6 +8,7 @@ import { ApiError } from "../../utils/apiError";
 import { StatusCode } from "../../constants/statusCode.constant";
 import { Message } from "../../constants/message.constant";
 import { ApiResponse } from "../../utils/apiResponse";
+import { tempMaxage } from "../../constants/token.constant";
 
 export class OtpController {
   private otpService = new OtpService();
@@ -31,8 +32,21 @@ export class OtpController {
         throw new ApiError(result.status, "OTP expired")
       }
 
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
       if (result.status === StatusCode.INTERNAL_SERVER_ERROR) {
         throw new ApiError(result.status, Message.INTERNAL_SERVER_ERROR);
+      }
+
+      if (result.tempToken) {
+        res.cookie("tempToken", result.tempToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false,
+          maxAge: tempMaxage
+        });
       }
 
       res.status(result.status).json(
@@ -43,7 +57,23 @@ export class OtpController {
 
   resendOtp = asyncHandler(
     async (req: Request, res: Response) => {
+      const result: any = await this.otpService.resendOtp(req.body);
 
+      if (result.status === StatusCode.NOT_FOUND) {
+        throw new ApiError(result.status, "User not found");
+      }
+
+      if (result.status === StatusCode.INTERNAL_SERVER_ERROR) {
+        throw new ApiError(result.status, Message.INTERNAL_SERVER_ERROR);
+      }
+
+      if (result.status === StatusCode.BAD_REQUEST) {
+        throw new ApiError(result.status, "Invalid request, Try again later");
+      }
+
+      res.status(result.status).json(
+        new ApiResponse(result.status, null, "OTP resent successfully")
+      )
     }
   );
 }
