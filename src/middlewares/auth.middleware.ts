@@ -24,7 +24,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: UserPayload;
-      payload?: TempPayload
+      payload?: TempPayload;
     }
   }
 }
@@ -34,13 +34,21 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
     let accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
 
-    if (!accessToken && !refreshToken) {
-      throw new ApiError(StatusCode.UNAUTHORIZED, "Sign in required");
+    let decoded: UserPayload | null = null;
+
+    if (accessToken) {
+      try {
+        decoded = verifyToken(accessToken, env.JWT_ACCESS_SECRET) as UserPayload;
+      } catch (error) {
+        decoded = null;
+      }
     }
 
-    let user;
+    if (!decoded) {
+      if (!refreshToken) {
+        throw new ApiError(StatusCode.UNAUTHORIZED, "Sign in required");
+      }
 
-    if (refreshToken) {
       let decodedRefresh: any;
       try {
         decodedRefresh = verifyToken(refreshToken, env.JWT_REFRESH_SECRET);
@@ -48,7 +56,7 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
         throw new ApiError(StatusCode.SESSION_EXPIRED, "Session expired, please login again");
       }
 
-      user = await ServerDataSource.getRepository(User).findOne({
+      const user = await ServerDataSource.getRepository(User).findOne({
         where: { id: decodedRefresh.id },
         relations: ["auth"],
       });
@@ -63,23 +71,8 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
       ) {
         throw new ApiError(StatusCode.SESSION_EXPIRED, "Invalid or expired session");
       }
-    } else {
-      throw new ApiError(StatusCode.UNAUTHORIZED, "Sign in required");
-    }
 
-    let decoded: UserPayload | null = null;
-
-    if (accessToken) {
-      try {
-        decoded = verifyToken(accessToken, env.JWT_ACCESS_SECRET) as UserPayload;
-      } catch (error) {
-        decoded = null;
-      }
-    }
-
-    if (!decoded && refreshToken && user) {
       accessToken = generateAccessToken(user.id, user.role, user.auth.id);
-
       res.cookie("accessToken", accessToken, getCookieOptions(accessMaxage));
 
       decoded = {
@@ -87,10 +80,6 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
         role: user.role,
         authId: user.auth.id,
       };
-    }
-
-    if (!decoded) {
-      throw new ApiError(StatusCode.UNAUTHORIZED, "Authentication failed");
     }
 
     if (allowedRoles.length > 0 && !allowedRoles.includes(decoded.role)) {
@@ -109,13 +98,12 @@ export const tempAuthenticate = asyncHandler(
       throw new ApiError(StatusCode.UNAUTHORIZED, "OTP verification required");
     }
 
-    const decoded: any = verifyToken(tempToken, env.JWT_TEMP_SECRET);
-
-    if (!decoded) {
-      throw new ApiError(StatusCode.SESSION_EXPIRED, "Session expired");
+    try {
+      const decoded = verifyToken(tempToken, env.JWT_TEMP_SECRET) as TempPayload;
+      req.payload = decoded;
+      next();
+    } catch (error) {
+      throw new ApiError(StatusCode.SESSION_EXPIRED, "Invalid or expired session");
     }
-
-    (req as any).payload = decoded;
-    next();
   }
 );
