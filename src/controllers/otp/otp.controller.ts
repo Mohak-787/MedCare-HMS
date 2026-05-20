@@ -8,7 +8,7 @@ import { ApiError } from "../../utils/apiError";
 import { StatusCode } from "../../constants/statusCode.constant";
 import { Message } from "../../constants/message.constant";
 import { ApiResponse } from "../../utils/apiResponse";
-import { tempMaxage } from "../../constants/token.constant";
+import { tempMaxage, getCookieOptions } from "../../constants/token.constant";
 
 export class OtpController {
   private otpService = new OtpService();
@@ -41,12 +41,7 @@ export class OtpController {
       }
 
       if (result.tempToken) {
-        res.cookie("tempToken", result.tempToken, {
-          httpOnly: true,
-          sameSite: "strict",
-          secure: false,
-          maxAge: tempMaxage
-        });
+        res.cookie("tempToken", result.tempToken, getCookieOptions(tempMaxage));
       }
 
       res.status(result.status).json(

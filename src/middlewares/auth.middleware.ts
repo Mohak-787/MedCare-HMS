@@ -6,7 +6,7 @@ import { StatusCode } from "../constants/statusCode.constant";
 import env from "../constants/env.constant";
 import ServerDataSource from "../configs/db.config";
 import { User } from "../entities/user.entity";
-import { accessMaxage } from "../constants/token.constant";
+import { accessMaxage, getCookieOptions } from "../constants/token.constant";
 import { asyncHandler } from "../utils/asyncHandler";
 
 interface UserPayload {
@@ -80,12 +80,7 @@ export const authenticate = (allowedRoles: UserRole[] = []) =>
     if (!decoded && refreshToken && user) {
       accessToken = generateAccessToken(user.id, user.role, user.auth.id);
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        sameSite: "strict",
-        secure: false,
-        maxAge: accessMaxage,
-      });
+      res.cookie("accessToken", accessToken, getCookieOptions(accessMaxage));
 
       decoded = {
         id: user.id,

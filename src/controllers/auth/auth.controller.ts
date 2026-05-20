@@ -8,7 +8,7 @@ import { ApiError } from "../../utils/apiError";
 import { StatusCode } from "../../constants/statusCode.constant";
 import { ApiResponse } from "../../utils/apiResponse";
 import { SigninDto } from "../../dtos/auth/signin.dto";
-import { accessMaxage, refreshMaxage } from "../../constants/token.constant";
+import { accessMaxage, refreshMaxage, getCookieOptions } from "../../constants/token.constant";
 import { ChangePasswordDto } from "../../dtos/auth/changePassword.dto";
 import { ResetPasswordDto } from "../../dtos/auth/resetPassword.dto";
 import { ForgotPasswordDto } from "../../dtos/auth/forgotPassword.dto";
@@ -65,19 +65,8 @@ export class AuthController {
         throw new ApiError(result.status, "Email verification required");
       }
 
-      res.cookie('refreshToken', result?.refreshToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-        secure: false,
-        maxAge: refreshMaxage
-      });
-
-      res.cookie('accessToken', result?.accessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-        secure: false,
-        maxAge: accessMaxage
-      });
+      res.cookie('refreshToken', result?.refreshToken, getCookieOptions(refreshMaxage));
+      res.cookie('accessToken', result?.accessToken, getCookieOptions(accessMaxage));
 
       res.status(result.status).json(
         new ApiResponse(result.status, null, "Signin successful")
@@ -107,8 +96,8 @@ export class AuthController {
         throw new ApiError(result.status, "Incorrect old password");
       }
 
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
+      res.clearCookie("accessToken", getCookieOptions());
+      res.clearCookie("refreshToken", getCookieOptions());
 
       res.status(result.status).json(
         new ApiResponse(result.status, null, "Password changed successfully")
@@ -135,7 +124,7 @@ export class AuthController {
         throw new ApiError(result.status, "User not found");
       }
 
-      res.clearCookie("tempToken");
+      res.clearCookie("tempToken", getCookieOptions());
       res.status(result.status).json(
         new ApiResponse(result.status, null, "Password reset sucessfully")
       )
@@ -175,8 +164,8 @@ export class AuthController {
         throw new ApiError(result.status, "User not found");
       }
 
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
+      res.clearCookie("accessToken", getCookieOptions());
+      res.clearCookie("refreshToken", getCookieOptions());
 
       res.status(result.status).json(
         new ApiResponse(result.status, null, "User logged out successfully")
@@ -192,8 +181,8 @@ export class AuthController {
         throw new ApiError(result.status, "User not found");
       }
 
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
+      res.clearCookie("accessToken", getCookieOptions());
+      res.clearCookie("refreshToken", getCookieOptions());
 
       res.status(result.status).json(
         new ApiResponse(result.status, null, "User logged out from all device successfully")
